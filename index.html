@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Eyalet KML Üretici</title>
+
+  <!-- SEKME İKONU (favicon) -->
+  <link rel="icon" type="image/png" href="./kmlimg.png" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand brandRow">
+        <img src="./falvior.png" class="logo" alt="logo" />
+        <div>
+          <h1>Eyalet KML Üretici</h1>
+          <p class="sub">Eyalet seç → border ayarla → KML indir → Earth Studio’da overlay olarak kullan.</p>
+        </div>
+      </div>
+
+      <div class="badge">⚡ Border only • KML</div>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <!-- SOL: ayarlar + preview -->
+        <div>
+          <div class="field">
+            <label>Border rengi</label>
+            <input id="color" type="color" value="#ffffff" />
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label>Kalınlık</label>
+            <div class="rangeRow">
+              <input id="width" type="range" min="1" max="14" value="4" />
+              <div class="pill"><span id="widthVal">4</span> px</div>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label>Saydamlık</label>
+            <div class="rangeRow">
+              <input id="alpha" type="range" min="0" max="100" value="100" />
+              <div class="pill"><span id="alphaVal">100</span>%</div>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div class="previewBox" style="margin-top:14px;">
+            <div class="previewTop">
+              <div class="previewTitle">Önizleme</div>
+              <div class="previewMeta"><span id="previewText">#ffffff • 4px • 100%</span></div>
+            </div>
+
+            <svg id="previewSvg" viewBox="0 0 300 60" width="100%" height="60" aria-label="border preview">
+              <rect x="8" y="10" width="284" height="40" rx="10" ry="10"
+                    fill="rgba(0,0,0,.18)" stroke="rgba(255,255,255,.08)"/>
+              <path id="previewPath"
+                    d="M24 40 C 80 18, 120 52, 176 30 C 210 16, 248 22, 276 36"
+                    fill="none" stroke="#ffffff" stroke-width="4"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+
+          <div class="actions">
+            <button id="dl" class="btn" type="button">KML İndir</button>
+            <button id="reset" class="btn secondary" type="button">Sıfırla</button>
+          </div>
+
+          <div id="msg" class="hint"></div>
+          <div class="foot">Not: Alaska gibi eyaletler çok parçalıdır; listede tek satır görünmesi için optimize ettik.</div>
+        </div>
+
+        <!-- SAĞ: arama + custom select -->
+        <div>
+          <div class="field">
+            <label>Ara</label>
+            <input id="q" type="text" placeholder="mesela: New York / Kaliforniya / Texas" />
+          </div>
+
+          <div class="field" style="margin-top:12px;">
+            <label>Eyalet seç</label>
+
+            <div class="combo" id="combo">
+              <button class="comboBtn" id="comboBtn" type="button">
+                <span id="stateInput">Yükleniyor…</span>
+                <span class="chev">▾</span>
+              </button>
+
+              <div class="comboMenu" id="comboMenu">
+                <input id="stateSearch" class="comboSearch" type="text" placeholder="Buradan filtrele…" />
+                <div class="comboList" id="stateList"></div>
+              </div>
+            </div>
+
+            <div class="smallNote">İpucu: üstte arama yazınca liste de filtrelenir.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
