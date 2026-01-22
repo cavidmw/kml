@@ -6,7 +6,7 @@
   <title>Eyalet KML Üretici</title>
 
   <!-- SEKME İKONU (favicon) -->
-  <link rel="icon" type="image/png" href="./kmlimg.png" />
+  <link rel="icon" type="image/png" href="./falvior.png" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="./style.css" />
@@ -15,12 +15,10 @@
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div class="brand brandRow">
-        <img src="./falvior.png" class="logo" alt="logo" />
-        <div>
-          <h1>Eyalet KML Üretici</h1>
-          <p class="sub">Eyalet seç → border ayarla → KML indir → Earth Studio’da overlay olarak kullan.</p>
-        </div>
+      <!-- ÜSTTE LOGO YOK -->
+      <div class="brand">
+        <h1>Eyalet KML Üretici</h1>
+        <p class="sub">Eyalet seç → border ayarla → KML indir → Earth Studio’da overlay olarak kullan.</p>
       </div>
 
       <div class="badge">⚡ Border only • KML</div>
@@ -77,14 +75,9 @@
           <div class="foot">Not: Alaska gibi eyaletler çok parçalıdır; listede tek satır görünmesi için optimize ettik.</div>
         </div>
 
-        <!-- SAĞ: arama + custom select -->
+        <!-- SAĞ: sadece eyalet seç -->
         <div>
           <div class="field">
-            <label>Ara</label>
-            <input id="q" type="text" placeholder="mesela: New York / Kaliforniya / Texas" />
-          </div>
-
-          <div class="field" style="margin-top:12px;">
             <label>Eyalet seç</label>
 
             <div class="combo" id="combo">
@@ -99,8 +92,11 @@
               </div>
             </div>
 
-            <div class="smallNote">İpucu: üstte arama yazınca liste de filtrelenir.</div>
+            <div class="smallNote">İpucu: Açılan menüde yukarıdaki kutudan aratabilirsin.</div>
           </div>
+
+          <!-- ÜST ARAMA KALDIRILDI ama JS bozulmasın diye gizli bıraktık -->
+          <input id="q" type="hidden" value="" />
         </div>
       </div>
     </div>
