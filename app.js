@@ -34,16 +34,26 @@ const FIPS_TO_EN = {
 const els = {
   q: document.getElementById("q"),
 
+  // border
   color: document.getElementById("color"),
   width: document.getElementById("width"),
   alpha: document.getElementById("alpha"),
-
   widthVal: document.getElementById("widthVal"),
   alphaVal: document.getElementById("alphaVal"),
 
-  previewPath: document.getElementById("previewPath"),
-  previewText: document.getElementById("previewText"),
+  // fill
+  fillToggle: document.getElementById("fillToggle"),
+  fillControls: document.getElementById("fillControls"),
+  fillColor: document.getElementById("fillColor"),
+  fillAlpha: document.getElementById("fillAlpha"),
+  fillAlphaVal: document.getElementById("fillAlphaVal"),
 
+  // preview
+  previewRect: document.getElementById("previewRect"),
+  previewText: document.getElementById("previewText"),
+  previewFillText: document.getElementById("previewFillText"),
+
+  // buttons / msg
   dl: document.getElementById("dl"),
   reset: document.getElementById("reset"),
   msg: document.getElementById("msg"),
@@ -58,6 +68,7 @@ const els = {
 
 let geoByEN = {};
 let selectedEN = "Alabama";
+let fillEnabled = false;
 
 function setMsg(text, type){
   els.msg.textContent = text || "";
@@ -73,6 +84,7 @@ function escapeXml(s){
     .replaceAll("'","&apos;");
 }
 
+// hex(#RRGGBB) + alpha(0..1) -> KML AABBGGRR
 function hexToKmlAABBGGRR(hex, alpha01){
   const r = parseInt(hex.slice(1,3), 16);
   const g = parseInt(hex.slice(3,5), 16);
@@ -81,7 +93,6 @@ function hexToKmlAABBGGRR(hex, alpha01){
   const aa = Math.round(a * 255);
 
   const to2 = (n)=> n.toString(16).padStart(2,"0");
-  // KML: AABBGGRR
   return (to2(aa) + to2(b) + to2(g) + to2(r)).toLowerCase();
 }
 
@@ -148,9 +159,12 @@ function multiPolygonToSinglePlacemark(nameTR, styleId, multiPolyCoords){
   </Placemark>`;
 }
 
-function featureToKml(nameTR, feature, lineColorKml, width){
+function featureToKml(nameTR, feature, lineColorKml, width, fillOn, fillColorKml){
   const styleId = "s1";
   const w = Math.max(1, Math.min(50, Number(width)||4));
+
+  const fillFlag = fillOn ? 1 : 0;
+  const polyColor = fillOn ? `<color>${fillColorKml}</color>` : "";
 
   const styles = `
   <Style id="${styleId}">
@@ -159,7 +173,8 @@ function featureToKml(nameTR, feature, lineColorKml, width){
       <width>${w}</width>
     </LineStyle>
     <PolyStyle>
-      <fill>0</fill>
+      ${polyColor}
+      <fill>${fillFlag}</fill>
       <outline>1</outline>
     </PolyStyle>
   </Style>`;
@@ -175,10 +190,12 @@ function featureToKml(nameTR, feature, lineColorKml, width){
     throw new Error("Desteklenmeyen geometri: " + geom.type);
   }
 
+  const suffix = fillOn ? "_fill" : "_border";
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
 <Document>
-  <name>${escapeXml(nameTR)} - border</name>
+  <name>${escapeXml(nameTR)}${suffix}</name>
   ${styles}
   ${placemarks}
 </Document>
@@ -197,23 +214,60 @@ function downloadText(filename, text){
 }
 
 // ----- UI -----
-function syncPreview(){
-  // sayılar
-  if(els.widthVal) els.widthVal.textContent = els.width.value;
-  if(els.alphaVal) els.alphaVal.textContent = els.alpha.value;
+function setFillUiEnabled(on){
+  fillEnabled = !!on;
 
-  const a01 = Number(els.alpha.value) / 100;
-
-  // preview çizgisi
-  if(els.previewPath){
-    els.previewPath.setAttribute("stroke", els.color.value);
-    els.previewPath.setAttribute("stroke-width", String(els.width.value));
-    els.previewPath.setAttribute("stroke-opacity", String(a01));
+  // button text
+  if(els.fillToggle){
+    els.fillToggle.setAttribute("aria-pressed", String(fillEnabled));
+    els.fillToggle.textContent = fillEnabled ? "Açık" : "Kapalı";
+    // küçük görsel vurgu (btn class)
+    els.fillToggle.classList.toggle("on", fillEnabled);
   }
 
-  // preview text
+  // controls show/hide
+  if(els.fillControls){
+    els.fillControls.style.display = fillEnabled ? "block" : "none";
+  }
+
+  syncPreview();
+}
+
+function syncPreview(){
+  // numbers
+  if(els.widthVal) els.widthVal.textContent = els.width.value;
+  if(els.alphaVal) els.alphaVal.textContent = els.alpha.value;
+  if(els.fillAlphaVal) els.fillAlphaVal.textContent = els.fillAlpha.value;
+
+  const borderA01 = Number(els.alpha.value) / 100;
+  const fillA01 = Number(els.fillAlpha.value) / 100;
+
+  // preview rect (square)
+  if(els.previewRect){
+    els.previewRect.setAttribute("stroke", els.color.value);
+    els.previewRect.setAttribute("stroke-width", String(els.width.value));
+    els.previewRect.setAttribute("stroke-opacity", String(borderA01));
+
+    if(fillEnabled){
+      // SVG fill needs rgba
+      const hex = els.fillColor.value;
+      const r = parseInt(hex.slice(1,3), 16);
+      const g = parseInt(hex.slice(3,5), 16);
+      const b = parseInt(hex.slice(5,7), 16);
+      els.previewRect.setAttribute("fill", `rgba(${r},${g},${b},${fillA01})`);
+    } else {
+      els.previewRect.setAttribute("fill", "rgba(0,0,0,0)");
+    }
+  }
+
+  // preview texts
   if(els.previewText){
-    els.previewText.textContent = `${els.color.value} • ${els.width.value}px • ${els.alpha.value}%`;
+    els.previewText.textContent = `Border: ${els.color.value} • ${els.width.value}px • ${els.alpha.value}%`;
+  }
+  if(els.previewFillText){
+    els.previewFillText.textContent = fillEnabled
+      ? `Dolgu: ${els.fillColor.value} • ${els.fillAlpha.value}%`
+      : `Dolgu: Kapalı`;
   }
 }
 
@@ -249,7 +303,6 @@ function renderStateList(){
     return `<div class="${cls}" data-en="${x.en}">${x.tr}</div>`;
   }).join("");
 
-  // click
   els.stateList.querySelectorAll("[data-en]").forEach(el=>{
     el.addEventListener("click", ()=> setSelected(el.getAttribute("data-en")));
   });
@@ -268,17 +321,27 @@ async function init(){
     if(en) geoByEN[en] = f;
   }
 
-  // default
+  // defaults
   setSelected("Alabama");
+  setFillUiEnabled(false);
   syncPreview();
   setMsg("Hazır.", "ok");
 }
 
 function wireEvents(){
-  // preview updates
+  // preview updates (border)
   els.color.addEventListener("input", syncPreview);
   els.width.addEventListener("input", syncPreview);
   els.alpha.addEventListener("input", syncPreview);
+
+  // fill
+  if(els.fillToggle){
+    els.fillToggle.addEventListener("click", ()=>{
+      setFillUiEnabled(!fillEnabled);
+    });
+  }
+  if(els.fillColor) els.fillColor.addEventListener("input", syncPreview);
+  if(els.fillAlpha) els.fillAlpha.addEventListener("input", syncPreview);
 
   // dropdown
   els.comboBtn.addEventListener("click", ()=>{
@@ -293,15 +356,23 @@ function wireEvents(){
     if(!inside) closeMenu();
   });
 
-  // global search filters list
+  // global search filters list (hidden input ama sorun yok)
   els.q.addEventListener("input", renderStateList);
 
   // reset
   els.reset.addEventListener("click", ()=>{
     els.q.value = "";
+
+    // border defaults
     els.color.value = "#ffffff";
     els.width.value = 4;
     els.alpha.value = 100;
+
+    // fill defaults
+    els.fillColor.value = "#22c55e";
+    els.fillAlpha.value = 35;
+    setFillUiEnabled(false);
+
     setSelected("Alabama");
     syncPreview();
     setMsg("", "");
@@ -318,12 +389,21 @@ function wireEvents(){
       }
 
       const trName = TR[en] || en;
-      const alpha01 = Number(els.alpha.value) / 100;
-      const kmlColor = hexToKmlAABBGGRR(els.color.value, alpha01);
+
+      // border
+      const borderA01 = Number(els.alpha.value) / 100;
+      const borderKmlColor = hexToKmlAABBGGRR(els.color.value, borderA01);
       const width = els.width.value;
 
-      const kml = featureToKml(trName, f, kmlColor, width);
-      downloadText(`${trName}_border.kml`, kml);
+      // fill (optional)
+      const fillA01 = Number(els.fillAlpha.value) / 100;
+      const fillKmlColor = hexToKmlAABBGGRR(els.fillColor.value, fillA01);
+
+      const kml = featureToKml(trName, f, borderKmlColor, width, fillEnabled, fillKmlColor);
+
+      const suffix = fillEnabled ? "_border_fill" : "_border";
+      downloadText(`${trName}${suffix}.kml`, kml);
+
       setMsg("KML indirildi.", "ok");
     } catch(e){
       console.error(e);
