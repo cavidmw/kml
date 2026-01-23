@@ -380,3 +380,26 @@ h1{
   object-fit:cover;
   box-shadow: 0 0 0 2px rgba(255,255,255,.08);
 }
+
+/* ---- fill toggle + controls ---- */
+.toggleRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.fillControls{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.14);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+/* toggle açıkken buton yeşil dursun */
+.btn.on{
+  border-color: rgba(34,197,94,.75);
+  background: linear-gradient(180deg, rgba(34,197,94,.28), rgba(34,197,94,.14));
+  color: rgba(233,238,252,.98);
+  box-shadow: 0 10px 25px rgba(34,197,94,.22);
+}
