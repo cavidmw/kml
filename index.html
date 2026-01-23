@@ -6,7 +6,7 @@
   <title>Eyalet KML Üretici</title>
 
   <!-- SEKME İKONU (favicon) -->
-  <link rel="icon" type="image/png" href="./falvior.png" />
+  <link rel="icon" type="image/png" href="./kmlimg.png" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="./style.css" />
@@ -15,19 +15,19 @@
 <body>
   <div class="wrap">
     <div class="topbar">
-      <!-- ÜSTTE LOGO YOK -->
       <div class="brand">
         <h1>Eyalet KML Üretici</h1>
-        <p class="sub">Eyalet seç → border ayarla → KML indir → Earth Studio’da overlay olarak kullan.</p>
+        <p class="sub">Eyalet seç → border / iç dolgu ayarla → KML indir → Earth Studio’da overlay olarak kullan.</p>
       </div>
 
-      <div class="badge">⚡ Border only • KML</div>
+      <div class="badge">⚡ KML • Border + (Opsiyonel) Dolgu</div>
     </div>
 
     <div class="card">
       <div class="grid">
         <!-- SOL: ayarlar + preview -->
         <div>
+          <!-- BORDER -->
           <div class="field">
             <label>Border rengi</label>
             <input id="color" type="color" value="#ffffff" />
@@ -42,27 +42,61 @@
           </div>
 
           <div class="field" style="margin-top:12px;">
-            <label>Saydamlık</label>
+            <label>Border saydamlık</label>
             <div class="rangeRow">
               <input id="alpha" type="range" min="0" max="100" value="100" />
               <div class="pill"><span id="alphaVal">100</span>%</div>
             </div>
           </div>
 
-          <!-- Preview -->
+          <!-- FILL TOGGLE -->
+          <div class="field" style="margin-top:14px;">
+            <label>İçi renklendir</label>
+            <div class="toggleRow">
+              <button id="fillToggle" class="btn secondary" type="button" aria-pressed="false">
+                Kapalı
+              </button>
+              <div class="smallNote" style="margin:0;">Açarsan eyaletin içi boyanır.</div>
+            </div>
+          </div>
+
+          <!-- FILL CONTROLS (başta kapalı) -->
+          <div id="fillControls" class="fillControls" style="display:none; margin-top:12px;">
+            <div class="field">
+              <label>İç renk</label>
+              <input id="fillColor" type="color" value="#22c55e" />
+            </div>
+
+            <div class="field" style="margin-top:12px;">
+              <label>İç saydamlık</label>
+              <div class="rangeRow">
+                <input id="fillAlpha" type="range" min="0" max="100" value="35" />
+                <div class="pill"><span id="fillAlphaVal">35</span>%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview (kvadrat) -->
           <div class="previewBox" style="margin-top:14px;">
             <div class="previewTop">
               <div class="previewTitle">Önizleme</div>
-              <div class="previewMeta"><span id="previewText">#ffffff • 4px • 100%</span></div>
+              <div class="previewMeta">
+                <span id="previewText">Border: #ffffff • 4px • 100%</span>
+                <span id="previewFillText" style="margin-left:10px; opacity:.9;"></span>
+              </div>
             </div>
 
-            <svg id="previewSvg" viewBox="0 0 300 60" width="100%" height="60" aria-label="border preview">
-              <rect x="8" y="10" width="284" height="40" rx="10" ry="10"
+            <svg id="previewSvg" viewBox="0 0 300 90" width="100%" height="90" aria-label="preview">
+              <!-- arka panel -->
+              <rect x="8" y="10" width="284" height="70" rx="14" ry="14"
                     fill="rgba(0,0,0,.18)" stroke="rgba(255,255,255,.08)"/>
-              <path id="previewPath"
-                    d="M24 40 C 80 18, 120 52, 176 30 C 210 16, 248 22, 276 36"
-                    fill="none" stroke="#ffffff" stroke-width="4"
-                    stroke-linecap="round" stroke-linejoin="round" />
+              <!-- örnek eyalet kutusu -->
+              <rect id="previewRect"
+                    x="60" y="26" width="180" height="38" rx="10" ry="10"
+                    fill="rgba(0,0,0,0)"
+                    stroke="#ffffff" stroke-width="4"
+                    stroke-opacity="1"
+                    />
             </svg>
           </div>
 
@@ -95,7 +129,7 @@
             <div class="smallNote">İpucu: Açılan menüde yukarıdaki kutudan aratabilirsin.</div>
           </div>
 
-          <!-- ÜST ARAMA KALDIRILDI ama JS bozulmasın diye gizli bıraktık -->
+          <!-- JS bozulmasın diye gizli -->
           <input id="q" type="hidden" value="" />
         </div>
       </div>
